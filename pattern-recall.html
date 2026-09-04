@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern Recall - MindMate AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 650px;
+            background: white;
+            border-radius: 25px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        h1 {
+            color: #4b3f72;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .stat {
+            background: #f2f0ff;
+            padding: 12px 18px;
+            border-radius: 12px;
+            min-width: 100px;
+        }
+
+        .stat strong {
+            display: block;
+            color: #4b3f72;
+            font-size: 20px;
+        }
+
+        .difficulty {
+            margin-bottom: 20px;
+        }
+
+        select {
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            font-size: 16px;
+        }
+
+        .message {
+            min-height: 30px;
+            margin: 15px 0;
+            font-weight: bold;
+            color: #4b3f72;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 70px);
+            gap: 12px;
+            justify-content: center;
+            margin: 25px auto;
+        }
+
+        .tile {
+            width: 70px;
+            height: 70px;
+            border: none;
+            border-radius: 14px;
+            background: #e5e5e5;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .tile:hover {
+            transform: scale(1.05);
+        }
+
+        .tile.active {
+            background: #6c63ff;
+            box-shadow: 0 0 20px rgba(108, 99, 255, 0.7);
+        }
+
+        .tile.selected {
+            background: #4caf50;
+        }
+
+        button.start {
+            border: none;
+            background: #4b3f72;
+            color: white;
+            padding: 13px 28px;
+            border-radius: 12px;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        button.start:hover {
+            background: #352c58;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #4b3f72;
+            font-weight: bold;
+        }
+
+        @media (max-width: 500px) {
+            .grid {
+                grid-template-columns: repeat(4, 55px);
+                gap: 8px;
+            }
+
+            .tile {
+                width: 55px;
+                height: 55px;
+            }
+
+            .game-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="game-container">
+
+    <h1>🧩 Pattern Recall</h1>
+    <p class="subtitle">Remember the highlighted pattern!</p>
+
+    <div class="stats">
+        <div class="stat">
+            <strong id="round">0</strong>
+            Round
+        </div>
+
+        <div class="stat">
+            <strong id="score">0</strong>
+            Score
+        </div>
+    </div>
+
+    <div class="difficulty">
+        <label for="difficulty">Difficulty: </label>
+
+        <select id="difficulty">
+            <option value="3">Easy</option>
+            <option value="5" selected>Medium</option>
+            <option value="7">Hard</option>
+        </select>
+    </div>
+
+    <div class="message" id="message">
+        Press Start Game to begin!
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <button class="start" onclick="startGame()">
+        🚀 Start Game
+    </button>
+
+    <br>
+
+    <a class="back" href="index.html">
+        ← Back to MindMate
+    </a>
+
+</div>
+
+<script>
+
+    const grid = document.getElementById("grid");
+    const message = document.getElementById("message");
+    const scoreDisplay = document.getElementById("score");
+    const roundDisplay = document.getElementById("round");
+    const difficulty = document.getElementById("difficulty");
+
+    let pattern = [];
+    let selected = [];
+    let score = 0;
+    let round = 0;
+    let acceptingInput = false;
+
+    function createGrid() {
+
+        grid.innerHTML = "";
+
+        for (let i = 0; i < 16; i++) {
+
+            const tile = document.createElement("button");
+
+            tile.className = "tile";
+            tile.dataset.index = i;
+
+            tile.addEventListener("click", () => selectTile(i, tile));
+
+            grid.appendChild(tile);
+        }
+    }
+
+    function startGame() {
+
+        score = 0;
+        round = 0;
+
+        scoreDisplay.textContent = score;
+        roundDisplay.textContent = round;
+
+        createGrid();
+
+        nextRound();
+    }
+
+    function nextRound() {
+
+        round++;
+
+        roundDisplay.textContent = round;
+
+        selected = [];
+        acceptingInput = false;
+
+        const patternSize = Number(difficulty.value);
+
+        pattern = [];
+
+        while (pattern.length < patternSize) {
+
+            const randomTile = Math.floor(Math.random() * 16);
+
+            if (!pattern.includes(randomTile)) {
+                pattern.push(randomTile);
+            }
+        }
+
+        message.textContent = "👀 Remember the pattern...";
+
+        const tiles = document.querySelectorAll(".tile");
+
+        pattern.forEach(index => {
+            tiles[index].classList.add("active");
+        });
+
+        setTimeout(() => {
+
+            tiles.forEach(tile => {
+                tile.classList.remove("active");
+            });
+
+            acceptingInput = true;
+
+            message.textContent =
+                "🧠 Now reproduce the pattern!";
+
+        }, 1800);
+    }
+
+    function selectTile(index, tile) {
+
+        if (!acceptingInput) {
+            return;
+        }
+
+        if (selected.includes(index)) {
+            return;
+        }
+
+        selected.push(index);
+
+        tile.classList.add("selected");
+
+        if (selected.length === pattern.length) {
+
+            acceptingInput = false;
+
+            checkPattern();
+        }
+    }
+
+    function checkPattern() {
+
+        const correct =
+            selected.length === pattern.length &&
+            selected.every(index => pattern.includes(index));
+
+        if (correct) {
+
+            score += 10;
+
+            scoreDisplay.textContent = score;
+
+            message.textContent =
+                "🎉 Excellent! Pattern remembered!";
+
+            setTimeout(() => {
+                nextRound();
+            }, 1200);
+
+        } else {
+
+            message.textContent =
+                "❌ Incorrect pattern! Try the next round.";
+
+            setTimeout(() => {
+                nextRound();
+            }, 1500);
+        }
+    }
+
+    createGrid();
+
+</script>
+
+</body>
+</html>
