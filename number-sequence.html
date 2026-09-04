@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MindMate AI - Number Sequence</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #101936, #18285c);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 850px;
+            margin: auto;
+            text-align: center;
+            padding: 35px 20px;
+        }
+
+        .back {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        h1 {
+            font-size: 42px;
+            margin: 10px 0;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #d9def5;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        select,
+        button,
+        input {
+            font-family: inherit;
+        }
+
+        select {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 14px 22px;
+            border: none;
+            border-radius: 12px;
+            background: #2196f3;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1976d2;
+            transform: translateY(-1px);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin: 20px 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .game-box {
+            background: white;
+            color: #18213f;
+            border-radius: 20px;
+            padding: 45px 25px;
+            margin-top: 25px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+
+        #numberBox {
+            font-size: 58px;
+            font-weight: bold;
+            letter-spacing: 12px;
+            min-height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #1769aa;
+        }
+
+        #message {
+            font-size: 20px;
+            margin: 20px 0;
+            min-height: 30px;
+        }
+
+        .input-area {
+            display: none;
+            margin-top: 25px;
+        }
+
+        .input-area p {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        #answer {
+            width: 80%;
+            max-width: 450px;
+            padding: 16px;
+            border: 2px solid #b9c4e5;
+            border-radius: 12px;
+            font-size: 24px;
+            text-align: center;
+            outline: none;
+        }
+
+        #answer:focus {
+            border-color: #2196f3;
+        }
+
+        .submit-btn {
+            margin-top: 15px;
+        }
+
+        .result {
+            display: none;
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: 15px;
+            background: #eef5ff;
+        }
+
+        .result h2 {
+            margin-top: 0;
+        }
+
+        .correct {
+            color: #188038;
+            font-weight: bold;
+        }
+
+        .wrong {
+            color: #d93025;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+
+            h1 {
+                font-size: 32px;
+            }
+
+            .stats {
+                gap: 25px;
+                font-size: 17px;
+            }
+
+            #numberBox {
+                font-size: 40px;
+                letter-spacing: 7px;
+            }
+
+            #answer {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="index.html" class="back">← Back to MindMate AI</a>
+
+    <h1>🔢 Number Sequence</h1>
+
+    <p class="subtitle">
+        Memorize the numbers and enter them in the correct order.
+    </p>
+
+    <div class="controls">
+
+        <select id="difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+
+        <button onclick="startGame()">▶ Start Game</button>
+
+    </div>
+
+    <div class="stats">
+
+        <span>
+            Round:
+            <b id="round">0</b>
+        </span>
+
+        <span>
+            Score:
+            <b id="score">0</b>
+        </span>
+
+    </div>
+
+    <div class="game-box">
+
+        <div id="numberBox">
+            Press Start Game
+        </div>
+
+        <div id="message">
+            Choose a difficulty and start the game.
+        </div>
+
+        <!-- THIS IS THE INPUT BOX -->
+        <div id="inputArea" class="input-area">
+
+            <p>Enter the number you remember:</p>
+
+            <input
+                type="text"
+                id="answer"
+                placeholder="Enter number here"
+                autocomplete="off"
+            >
+
+            <br>
+
+            <button class="submit-btn" onclick="checkAnswer()">
+                ✓ Submit Answer
+            </button>
+
+        </div>
+
+        <div id="result" class="result">
+
+            <h2 id="resultTitle"></h2>
+
+            <p id="resultText"></p>
+
+            <button onclick="startGame()">
+                ▶ Next Round
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let sequence = "";
+    let score = 0;
+    let round = 0;
+    let canAnswer = false;
+
+    function startGame() {
+
+        // Get selected difficulty
+        const difficulty =
+            document.getElementById("difficulty").value;
+
+        // Settings for each level
+        let length = 4;
+        let displayTime = 2000;
+
+        if (difficulty === "medium") {
+            length = 6;
+            displayTime = 2500;
+        }
+
+        if (difficulty === "hard") {
+            length = 8;
+            displayTime = 3000;
+        }
+
+        // Generate random number sequence
+        sequence = "";
+
+        for (let i = 0; i < length; i++) {
+            sequence += Math.floor(Math.random() * 10);
+        }
+
+        // Update round
+        round++;
+
+        document.getElementById("round").textContent = round;
+
+        // Hide input
+        document.getElementById("inputArea").style.display = "none";
+
+        // Hide result
+        document.getElementById("result").style.display = "none";
+
+        // Show sequence
+        document.getElementById("numberBox").textContent = sequence;
+
+        document.getElementById("message").textContent =
+            "Memorize the number!";
+
+        canAnswer = false;
+
+        // Hide number after selected time
+        setTimeout(function () {
+
+            document.getElementById("numberBox").textContent =
+                "???";
+
+            document.getElementById("message").textContent =
+                "Now enter the number you remember.";
+
+            // SHOW INPUT BOX
+            document.getElementById("inputArea").style.display =
+                "block";
+
+            document.getElementById("answer").value = "";
+
+            document.getElementById("answer").focus();
+
+            canAnswer = true;
+
+        }, displayTime);
+    }
+
+
+    function checkAnswer() {
+
+        if (!canAnswer) {
+            return;
+        }
+
+        const answer =
+            document.getElementById("answer").value.trim();
+
+        if (answer === "") {
+
+            document.getElementById("message").textContent =
+                "⚠️ Please enter a number first.";
+
+            document.getElementById("answer").focus();
+
+            return;
+        }
+
+        canAnswer = false;
+
+        if (answer === sequence) {
+
+            score += 10;
+
+            document.getElementById("score").textContent =
+                score;
+
+            document.getElementById("resultTitle").textContent =
+                "🎉 Correct!";
+
+            document.getElementById("resultText").textContent =
+                "Excellent memory! You remembered the sequence correctly.";
+
+            document.getElementById("message").innerHTML =
+                '<span class="correct">✓ Correct answer!</span>';
+
+        } else {
+
+            document.getElementById("resultTitle").textContent =
+                "❌ Incorrect";
+
+            document.getElementById("resultText").textContent =
+                "The correct sequence was: " + sequence;
+
+            document.getElementById("message").innerHTML =
+                '<span class="wrong">✗ Incorrect answer.</span>';
+        }
+
+        // Hide input
+        document.getElementById("inputArea").style.display =
+            "none";
+
+        // Show result
+        document.getElementById("result").style.display =
+            "block";
+    }
+
+
+    // Allow ENTER key to submit
+    document.getElementById("answer").addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key === "Enter") {
+                checkAnswer();
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+</html>
